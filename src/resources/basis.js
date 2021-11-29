@@ -18,7 +18,7 @@ const getCompressionFormats = (device) => {
 const prepareWorkerModules = (config, callback) => {
     const getWorkerBlob = () => {
         const code = '(' + BasisWorker.toString() + ')()\n\n';
-        return new File([code], 'basis_worker.js', { type: 'application/javascript' });
+        return new Blob([code], { type: 'application/javascript' });
     };
 
     const wasmSupported = () => {
@@ -63,8 +63,8 @@ const prepareWorkerModules = (config, callback) => {
 
         const compileManual = () => {
             fetchPromise
-                .then((result) => result.arrayBuffer())
-                .then((buffer) => WebAssembly.compile(buffer))
+                .then(result => result.arrayBuffer())
+                .then(buffer => WebAssembly.compile(buffer))
                 .then((module_) => {
                     if (basisCode) {
                         sendResponse(basisCode, module_);
@@ -195,15 +195,17 @@ class BasisClient {
     }
 
     run(job) {
+        const transfer = [];
+        if (job.data instanceof ArrayBuffer) {
+            transfer.push(job.data);
+        }
         this.worker.postMessage({
             type: 'transcode',
             url: job.url,
             format: job.format,
             data: job.data,
             options: job.options
-        }, [
-            job.data
-        ]);
+        }, transfer);
         if (this.eager) {
             this.queue.enqueueClient(this);
         }
@@ -312,6 +314,8 @@ let deviceDetails = null;
  * @param {object} [options] - Options structure
  * @param {boolean} [options.isGGGR] - Indicates this is a GGGR swizzled texture. Under some
  * circumstances the texture will be unswizzled during transcoding.
+ * @param {boolean} [options.isKTX2] - Indicates the image is KTX2 format. Otherwise
+ * basis format is assumed.
  * @returns {boolean} True if the basis worker was initialized and false otherwise.
  */
 function basisTranscode(device, url, data, callback, options) {
@@ -326,7 +330,8 @@ function basisTranscode(device, url, data, callback, options) {
 
     queue.enqueueJob(url, data, callback, {
         deviceDetails: deviceDetails,
-        isGGGR: !!options?.isGGGR
+        isGGGR: !!options?.isGGGR,
+        isKTX2: !!options?.isKTX2
     });
 
     return initializing;

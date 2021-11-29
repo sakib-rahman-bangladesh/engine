@@ -3,143 +3,16 @@ import * as pc from 'playcanvas/build/playcanvas.js';
 import { AssetLoader } from '../../app/helpers/loader';
 import Example from '../../app/example';
 // @ts-ignore: library file import
-import { Button, BooleanInput, LabelGroup } from '@playcanvas/pcui/pcui-react';
+import Button from '@playcanvas/pcui/Button/component';
 // @ts-ignore: library file import
-import { BindingTwoWay, Observer } from '@playcanvas/pcui/pcui-binding';
+import LabelGroup from '@playcanvas/pcui/LabelGroup/component';
+// @ts-ignore: library file import
+import BooleanInput from '@playcanvas/pcui/BooleanInput/component';
+// @ts-ignore: library file import
+import BindingTwoWay from '@playcanvas/pcui/BindingTwoWay';
+// @ts-ignore: library file import
+import { Observer } from '@playcanvas/observer';
 import { wasmSupported, loadWasmModuleAsync } from '../../wasm-loader';
-
-// create an anim state graph
-const animStateGraphData = {
-    "layers": [
-        {
-            "name": "locomotion",
-            "states": [
-                {
-                    "name": "START"
-                },
-                {
-                    "name": "Idle",
-                    "speed": 1.0
-                },
-                {
-                    "name": "Walk",
-                    "speed": 1.0
-                },
-                {
-                    "name": "Jump",
-                    "speed": 1
-                },
-                {
-                    "name": "Jog",
-                    "speed": 1.0
-                },
-                {
-                    "name": "END"
-                }
-            ],
-            "transitions": [
-                {
-                    "from": "START",
-                    "to": "Idle",
-                    "time": 0,
-                    "priority": 0
-                },
-                {
-                    "from": "Idle",
-                    "to": "Walk",
-                    "time": 0.1,
-                    "priority": 0,
-                    "conditions": [
-                        {
-                            "parameterName": "speed",
-                            "predicate": pc.ANIM_GREATER_THAN,
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "from": "ANY",
-                    "to": "Jump",
-                    "time": 0.1,
-                    "priority": 0,
-                    "conditions": [
-                        {
-                            "parameterName": "jump",
-                            "predicate": pc.ANIM_EQUAL_TO,
-                            "value": true
-                        }
-                    ]
-                },
-                {
-                    "from": "Jump",
-                    "to": "Idle",
-                    "time": 0.2,
-                    "priority": 0,
-                    "exitTime": 0.8
-                },
-                {
-                    "from": "Jump",
-                    "to": "Walk",
-                    "time": 0.2,
-                    "priority": 0,
-                    "exitTime": 0.8
-                },
-                {
-                    "from": "Walk",
-                    "to": "Idle",
-                    "time": 0.1,
-                    "priority": 0,
-                    "conditions": [
-                        {
-                            "parameterName": "speed",
-                            "predicate": pc.ANIM_LESS_THAN_EQUAL_TO,
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "from": "Walk",
-                    "to": "Jog",
-                    "time": 0.1,
-                    "priority": 0,
-                    "conditions": [
-                        {
-                            "parameterName": "speed",
-                            "predicate": pc.ANIM_GREATER_THAN,
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "from": "Jog",
-                    "to": "Walk",
-                    "time": 0.1,
-                    "priority": 0,
-                    "conditions": [
-                        {
-                            "parameterName": "speed",
-                            "predicate": pc.ANIM_LESS_THAN,
-                            "value": 2
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "parameters": {
-        "speed": {
-            "name": "speed",
-            "type": pc.ANIM_PARAMETER_INTEGER,
-            "value": 0
-        },
-        "jump": {
-            "name": "jump",
-            "type": pc.ANIM_PARAMETER_TRIGGER,
-            "value": false
-        }
-    }
-};
-
 
 class LocomotionExample extends Example {
     static CATEGORY = 'Animation';
@@ -153,11 +26,10 @@ class LocomotionExample extends Example {
             <AssetLoader name='walkAnim' type='container' url='static/assets/animations/bitmoji/walk.glb' />
             <AssetLoader name='jogAnim' type='container' url='static/assets/animations/bitmoji/run.glb' />
             <AssetLoader name='jumpAnim' type='container' url='static/assets/animations/bitmoji/jump-flip.glb' />
-            <AssetLoader name='animStateGraph' type='json' data={animStateGraphData} />
+            <AssetLoader name='cubemap' type='cubemap' url='static/assets/cubemaps/helipad.dds' data={{ type: pc.TEXTURETYPE_RGBM }}/>
         </>;
     }
 
-    // @ts-ignore: override class function
     controls(data: Observer) {
         return <>
             <Button text='Jump' onClick={() => data.emit('jump')}/>
@@ -167,8 +39,7 @@ class LocomotionExample extends Example {
         </>;
     }
 
-    // @ts-ignore: override class function
-    example(canvas: HTMLCanvasElement, assets: { model: pc.Asset, idleAnim: pc.Asset, walkAnim: pc.Asset, jogAnim: pc.Asset, jumpAnim: pc.Asset, playcanvasGreyTexture: pc.Asset, animStateGraph: pc.Asset }, data: any, wasmSupported: any, loadWasmModuleAsync: any): void {
+    example(canvas: HTMLCanvasElement, assets: any, data: any, wasmSupported: any, loadWasmModuleAsync: any): void {
 
         if (wasmSupported()) {
             loadWasmModuleAsync('Ammo', 'static/lib/ammo/ammo.wasm.js', 'static/lib/ammo/ammo.wasm.wasm', run);
@@ -181,30 +52,37 @@ class LocomotionExample extends Example {
             // Create the application and start the update loop
             const app = new pc.Application(canvas, {});
 
+            // setup skydome
+            app.scene.skyboxMip = 2;
+            app.scene.skyboxIntensity = 0.7;
+            app.scene.setSkybox(assets.cubemap.resources);
+            app.scene.gammaCorrection = pc.GAMMA_SRGB;
+            app.scene.toneMapping = pc.TONEMAP_ACES;
+
             // Create an Entity with a camera component
             const cameraEntity = new pc.Entity();
             cameraEntity.name = "Camera";
             cameraEntity.addComponent("camera", {
                 clearColor: new pc.Color(0.1, 0.15, 0.2)
             });
-            cameraEntity.translateLocal(0, 5, 15);
-            cameraEntity.rotateLocal(-20, 0, 0);
+
+            cameraEntity.translateLocal(0.5, 3, 8);
+            cameraEntity.rotateLocal(-30, 0, 0);
             app.root.addChild(cameraEntity);
 
-            app.scene.ambientLight = new pc.Color(0.5, 0.5, 0.5);
             // Create an entity with a light component
             const light = new pc.Entity();
             light.addComponent("light", {
                 type: "directional",
                 color: new pc.Color(1, 1, 1),
                 castShadows: true,
-                intensity: 1,
+                intensity: 2,
                 shadowBias: 0.2,
-                shadowDistance: 5,
+                shadowDistance: 16,
                 normalOffsetBias: 0.05,
                 shadowResolution: 2048
             });
-            light.setLocalEulerAngles(45, 30, 0);
+            light.setLocalEulerAngles(60, 30, 0);
             app.root.addChild(light);
 
             app.start();
@@ -225,8 +103,140 @@ class LocomotionExample extends Example {
                 activate: true
             });
 
+            // create an anim state graph
+            const animStateGraphData = {
+                "layers": [
+                    {
+                        "name": "locomotion",
+                        "states": [
+                            {
+                                "name": "START"
+                            },
+                            {
+                                "name": "Idle",
+                                "speed": 1.0
+                            },
+                            {
+                                "name": "Walk",
+                                "speed": 1.0
+                            },
+                            {
+                                "name": "Jump",
+                                "speed": 1
+                            },
+                            {
+                                "name": "Jog",
+                                "speed": 1.0
+                            },
+                            {
+                                "name": "END"
+                            }
+                        ],
+                        "transitions": [
+                            {
+                                "from": "START",
+                                "to": "Idle",
+                                "time": 0,
+                                "priority": 0
+                            },
+                            {
+                                "from": "Idle",
+                                "to": "Walk",
+                                "time": 0.1,
+                                "priority": 0,
+                                "conditions": [
+                                    {
+                                        "parameterName": "speed",
+                                        "predicate": pc.ANIM_GREATER_THAN,
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            {
+                                "from": "ANY",
+                                "to": "Jump",
+                                "time": 0.1,
+                                "priority": 0,
+                                "conditions": [
+                                    {
+                                        "parameterName": "jump",
+                                        "predicate": pc.ANIM_EQUAL_TO,
+                                        "value": true
+                                    }
+                                ]
+                            },
+                            {
+                                "from": "Jump",
+                                "to": "Idle",
+                                "time": 0.2,
+                                "priority": 0,
+                                "exitTime": 0.8
+                            },
+                            {
+                                "from": "Jump",
+                                "to": "Walk",
+                                "time": 0.2,
+                                "priority": 0,
+                                "exitTime": 0.8
+                            },
+                            {
+                                "from": "Walk",
+                                "to": "Idle",
+                                "time": 0.1,
+                                "priority": 0,
+                                "conditions": [
+                                    {
+                                        "parameterName": "speed",
+                                        "predicate": pc.ANIM_LESS_THAN_EQUAL_TO,
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            {
+                                "from": "Walk",
+                                "to": "Jog",
+                                "time": 0.1,
+                                "priority": 0,
+                                "conditions": [
+                                    {
+                                        "parameterName": "speed",
+                                        "predicate": pc.ANIM_GREATER_THAN,
+                                        "value": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "from": "Jog",
+                                "to": "Walk",
+                                "time": 0.1,
+                                "priority": 0,
+                                "conditions": [
+                                    {
+                                        "parameterName": "speed",
+                                        "predicate": pc.ANIM_LESS_THAN,
+                                        "value": 2
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "parameters": {
+                    "speed": {
+                        "name": "speed",
+                        "type": pc.ANIM_PARAMETER_INTEGER,
+                        "value": 0
+                    },
+                    "jump": {
+                        "name": "jump",
+                        "type": pc.ANIM_PARAMETER_TRIGGER,
+                        "value": false
+                    }
+                }
+            };
+
             // load the state graph into the anim component
-            characterEntity.anim.loadStateGraph(assets.animStateGraph.resource);
+            characterEntity.anim.loadStateGraph(animStateGraphData);
 
             // assign the loaded animation assets to each of the states present in the state graph
             const locomotionLayer = characterEntity.anim.baseLayer;

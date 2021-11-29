@@ -3,202 +3,7 @@ import * as pc from 'playcanvas/build/playcanvas.js';
 import { AssetLoader } from '../../app/helpers/loader';
 import Example from '../../app/example';
 // @ts-ignore: library file import
-import { Button } from '@playcanvas/pcui/pcui-react';
-
-const animClipStaticLightData = {
-    "name": "staticLight",
-    "duration": 1.0,
-    // curve keyframe inputs
-    "inputs": [
-        [
-            0.0
-        ]
-    ],
-    // curve keyframe outputs
-    "outputs": [
-        // a single RGBA color keyframe value of a green light
-        {
-            "components": 4,
-            "data": [
-                0.0, 1.0, 0.0, 1.0
-            ]
-        },
-        // a single quaternion keyframe value with no rotation
-        {
-            "components": 4,
-            "data": [
-                0.0, 0.0, 0.0, 0.0
-            ]
-        }
-    ],
-    // the curves contained in the clip, each with the path to the property they animation, the index of
-    // their input and output keyframes and the method of interpolation to be used
-    "curves": [
-        {
-            "path": { entityPath: ["lights", "spotLight1"], component: "light", propertyPath: ["color"] },
-            "inputIndex": 0,
-            "outputIndex": 0,
-            "interpolation": 1
-        },
-        {
-            "path": { entityPath: ["lights", "spotLight2"], component: "light", propertyPath: ["color"] },
-            "inputIndex": 0,
-            "outputIndex": 0,
-            "interpolation": 1
-        },
-        {
-            "path": { entityPath: ["lights", "spotLight1"], component: "entity", propertyPath: ["localEulerAngles"] },
-            "inputIndex": 0,
-            "outputIndex": 1,
-            "interpolation": 1
-        },
-        {
-            "path": { entityPath: ["lights", "spotLight2"], component: "entity", propertyPath: ["localEulerAngles"] },
-            "inputIndex": 0,
-            "outputIndex": 1,
-            "interpolation": 1
-        }
-    ]
-};
-
-// create the animation data for two flashing spot lights
-const animClipFlashingLightData = {
-    "name": "flashingLight",
-    "duration": 2.0,
-    // curve keyframe inputs
-    "inputs": [
-        [
-            0.0, 0.5, 1.0, 1.5, 2.0
-        ],
-        [
-            0, 1, 2
-        ]
-    ],
-    // curve keyframe outputs
-    "outputs": [
-        //  keyframe outputs for a flashing red RGBA color
-        {
-            "components": 4,
-            "data": [
-                1.0, 0.0, 0.0, 1.0,
-                0.4, 0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0, 1.0,
-                0.4, 0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0, 1.0
-            ]
-        },
-        //  keyframe outputs for a quaterion rotation
-        {
-            "components": 4,
-            "data": [
-                4.0, 0.0, 0.0, 0.0,
-                4.0, 180.0, 0.0, 0.0,
-                4.0, 0.0, 0.0, 0.0
-            ]
-        },
-        //  keyframe outputs for a quaterion rotation
-        {
-            "components": 4,
-            "data": [
-                -4.0, 0.0, 0.0, 0.0,
-                -4.0, 180.0, 0.0, 0.0,
-                -4.0, 0.0, 0.0, 0.0
-            ]
-        }
-    ],
-    // the curves contained in the clip, each with the path to the property they animation, the index of
-    // their input and output keyframes and the method of interpolation to be used
-    "curves": [
-        {
-            "path": { entityPath: ["lights", "spotLight1"], component: "light", propertyPath: ["color"] },
-            "inputIndex": 0,
-            "outputIndex": 0,
-            "interpolation": 1
-        },
-        {
-            "path": { entityPath: ["lights", "spotLight2"], component: "light", propertyPath: ["color"] },
-            "inputIndex": 0,
-            "outputIndex": 0,
-            "interpolation": 1
-        },
-        {
-            "path": { entityPath: ["lights", "spotLight1"], component: "entity", propertyPath: ["localEulerAngles"] },
-            "inputIndex": 1,
-            "outputIndex": 1,
-            "interpolation": 1
-        },
-        {
-            "path": { entityPath: ["lights", "spotLight2"], component: "entity", propertyPath: ["localEulerAngles"] },
-            "inputIndex": 1,
-            "outputIndex": 2,
-            "interpolation": 1
-        }
-    ]
-};
-
-// create an anim state graph
-const animStateGraphData = {
-    "layers": [
-        {
-            "name": "Base",
-            "states": [
-                {
-                    "name": "START"
-                },
-                {
-                    "name": "Static",
-                    "speed": 1.0
-                },
-                {
-                    "name": "Flash",
-                    "speed": 1.0
-                },
-                {
-                    "name": "END"
-                }
-            ],
-            "transitions": [
-                {
-                    "from": "START",
-                    "to": "Static"
-                },
-                {
-                    "from": "Static",
-                    "to": "Flash",
-                    "time": 1.5,
-                    "interruptionSource": "NEXT_STATE",
-                    "conditions": [
-                        {
-                            "parameterName": "flash",
-                            "predicate": "EQUAL_TO",
-                            "value": true
-                        }
-                    ]
-                },
-                {
-                    "from": "Flash",
-                    "to": "Static",
-                    "time": 1.5,
-                    "interruptionSource": "NEXT_STATE",
-                    "conditions": [
-                        {
-                            "parameterName": "flash",
-                            "predicate": "EQUAL_TO",
-                            "value": false
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "parameters": {
-        "flash": {
-            "name": "flash",
-            "type": "BOOLEAN",
-            "value": false
-        }
-    }
-};
+import Button from '@playcanvas/pcui/Button/component';
 
 class ComponentPropertiesExample extends Example {
     static CATEGORY = 'Animation';
@@ -207,9 +12,6 @@ class ComponentPropertiesExample extends Example {
     load() {
         return <>
             <AssetLoader name='playcanvasGreyTexture' type='texture' url='static/assets/textures/playcanvas-grey.png' />
-            <AssetLoader name='staticLightClip' type='json' data={animClipStaticLightData} />
-            <AssetLoader name='flashingLightClip' type='json' data={animClipFlashingLightData} />
-            <AssetLoader name='animStateGraph' type='json' data={animStateGraphData} />
         </>;
     }
 
@@ -224,7 +26,7 @@ class ComponentPropertiesExample extends Example {
 
 
     // @ts-ignore: abstract class function
-    example(canvas: HTMLCanvasElement, assets: { playcanvasGreyTexture: pc.Asset, staticLightClip: pc.Asset, flashingLightClip: pc.Asset, animStateGraph: pc.Asset }, data: any): void {
+    example(canvas: HTMLCanvasElement, assets: { playcanvasGreyTexture: pc.Asset }, data: any): void {
 
         const app = new pc.Application(canvas, {
             mouse: new pc.Mouse(document.body),
@@ -233,11 +35,141 @@ class ComponentPropertiesExample extends Example {
         });
 
         // create the animation data for two static spot lights
+        const animClipStaticLightData = {
+            "name": "staticLight",
+            "duration": 1.0,
+            // curve keyframe inputs
+            "inputs": [
+                [
+                    0.0
+                ]
+            ],
+            // curve keyframe outputs
+            "outputs": [
+                // a single RGBA color keyframe value of a green light
+                {
+                    "components": 4,
+                    "data": [
+                        0.0, 1.0, 0.0, 1.0
+                    ]
+                },
+                // a single quaternion keyframe value with no rotation
+                {
+                    "components": 4,
+                    "data": [
+                        0.0, 0.0, 0.0, 0.0
+                    ]
+                }
+            ],
+            // the curves contained in the clip, each with the path to the property they animation, the index of
+            // their input and output keyframes and the method of interpolation to be used
+            "curves": [
+                {
+                    "path": { entityPath: ["lights", "spotLight1"], component: "light", propertyPath: ["color"] },
+                    "inputIndex": 0,
+                    "outputIndex": 0,
+                    "interpolation": 1
+                },
+                {
+                    "path": { entityPath: ["lights", "spotLight2"], component: "light", propertyPath: ["color"] },
+                    "inputIndex": 0,
+                    "outputIndex": 0,
+                    "interpolation": 1
+                },
+                {
+                    "path": { entityPath: ["lights", "spotLight1"], component: "entity", propertyPath: ["localEulerAngles"] },
+                    "inputIndex": 0,
+                    "outputIndex": 1,
+                    "interpolation": 1
+                },
+                {
+                    "path": { entityPath: ["lights", "spotLight2"], component: "entity", propertyPath: ["localEulerAngles"] },
+                    "inputIndex": 0,
+                    "outputIndex": 1,
+                    "interpolation": 1
+                }
+            ]
+        };
+
+        // create the animation data for two flashing spot lights
+        const animClipFlashingLightData = {
+            "name": "flashingLight",
+            "duration": 2.0,
+            // curve keyframe inputs
+            "inputs": [
+                [
+                    0.0, 0.5, 1.0, 1.5, 2.0
+                ],
+                [
+                    0, 1, 2
+                ]
+            ],
+            // curve keyframe outputs
+            "outputs": [
+                //  keyframe outputs for a flashing red RGBA color
+                {
+                    "components": 4,
+                    "data": [
+                        1.0, 0.0, 0.0, 1.0,
+                        0.4, 0.0, 0.0, 1.0,
+                        1.0, 0.0, 0.0, 1.0,
+                        0.4, 0.0, 0.0, 1.0,
+                        1.0, 0.0, 0.0, 1.0
+                    ]
+                },
+                //  keyframe outputs for a quaterion rotation
+                {
+                    "components": 4,
+                    "data": [
+                        4.0, 0.0, 0.0, 0.0,
+                        4.0, 180.0, 0.0, 0.0,
+                        4.0, 0.0, 0.0, 0.0
+                    ]
+                },
+                //  keyframe outputs for a quaterion rotation
+                {
+                    "components": 4,
+                    "data": [
+                        -4.0, 0.0, 0.0, 0.0,
+                        -4.0, 180.0, 0.0, 0.0,
+                        -4.0, 0.0, 0.0, 0.0
+                    ]
+                }
+            ],
+            // the curves contained in the clip, each with the path to the property they animation, the index of
+            // their input and output keyframes and the method of interpolation to be used
+            "curves": [
+                {
+                    "path": { entityPath: ["lights", "spotLight1"], component: "light", propertyPath: ["color"] },
+                    "inputIndex": 0,
+                    "outputIndex": 0,
+                    "interpolation": 1
+                },
+                {
+                    "path": { entityPath: ["lights", "spotLight2"], component: "light", propertyPath: ["color"] },
+                    "inputIndex": 0,
+                    "outputIndex": 0,
+                    "interpolation": 1
+                },
+                {
+                    "path": { entityPath: ["lights", "spotLight1"], component: "entity", propertyPath: ["localEulerAngles"] },
+                    "inputIndex": 1,
+                    "outputIndex": 1,
+                    "interpolation": 1
+                },
+                {
+                    "path": { entityPath: ["lights", "spotLight2"], component: "entity", propertyPath: ["localEulerAngles"] },
+                    "inputIndex": 1,
+                    "outputIndex": 2,
+                    "interpolation": 1
+                }
+            ]
+        };
 
         // @ts-ignore
         const animClipHandler = new pc.AnimClipHandler();
-        const animClipStaticLight = animClipHandler.open(undefined, assets.staticLightClip.data);
-        const animClipFlashingLight = animClipHandler.open(undefined, assets.flashingLightClip.data);
+        const animClipStaticLight = animClipHandler.open(undefined, animClipStaticLightData);
+        const animClipFlashingLight = animClipHandler.open(undefined, animClipFlashingLightData);
 
         // Create an Entity with a camera component
         const cameraEntity = new pc.Entity();
@@ -310,17 +242,18 @@ class ComponentPropertiesExample extends Example {
             activate: true
         });
 
-        // load the state graph into the anim component
-        lightsEntity.anim.loadStateGraph(assets.animStateGraph.data);
-
         // assign animation clip asset resources to the appropriate states
         lightsEntity.anim.assignAnimation('Static', animClipStaticLight);
         lightsEntity.anim.assignAnimation('Flash', animClipFlashingLight);
 
         app.start();
 
-        data.on('flash:set', (value: boolean) => {
-            lightsEntity.anim.setBoolean('flash', value);
+        data.on('flash:set', () => {
+            if (lightsEntity.anim.baseLayer.activeState === 'Static') {
+                lightsEntity.anim.baseLayer.transition('Flash', 0.5);
+            } else {
+                lightsEntity.anim.baseLayer.transition('Static', 0.5);
+            }
         });
     }
 }

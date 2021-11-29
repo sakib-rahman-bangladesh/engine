@@ -3,7 +3,6 @@ import * as pc from 'playcanvas/build/playcanvas.js';
 import { AssetLoader } from '../../app/helpers/loader';
 import Example from '../../app/example';
 
-// class ComponentPropertiesExample extends Example {
 class ParticlesRandomSpritesExample extends Example {
     static CATEGORY = 'Graphics';
     static NAME = 'Particles: Random Sprites';
@@ -15,7 +14,6 @@ class ParticlesRandomSpritesExample extends Example {
         </>;
     }
 
-    // @ts-ignore: override class function
     example(canvas: HTMLCanvasElement, assets: { particlesCoinsTexture: pc.Asset, particlesBonusTexture: pc.Asset }): void {
 
         const app = new pc.Application(canvas, {

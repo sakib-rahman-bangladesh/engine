@@ -20,20 +20,20 @@ class ResourceLoader {
      * Handlers can optionally support patch(asset, assets) to handle dependencies on other assets.
      * @param {string} type - The name of the resource type that the handler will be registered with. Can be:
      *
-     * * {@link ASSET_ANIMATION}
-     * * {@link ASSET_AUDIO}
-     * * {@link ASSET_IMAGE}
-     * * {@link ASSET_JSON}
-     * * {@link ASSET_MODEL}
-     * * {@link ASSET_MATERIAL}
-     * * {@link ASSET_TEXT}
-     * * {@link ASSET_TEXTURE}
-     * * {@link ASSET_CUBEMAP}
-     * * {@link ASSET_SHADER}
-     * * {@link ASSET_CSS}
-     * * {@link ASSET_HTML}
-     * * {@link ASSET_SCRIPT}
-     * * {@link ASSET_CONTAINER}
+     * - {@link ASSET_ANIMATION}
+     * - {@link ASSET_AUDIO}
+     * - {@link ASSET_IMAGE}
+     * - {@link ASSET_JSON}
+     * - {@link ASSET_MODEL}
+     * - {@link ASSET_MATERIAL}
+     * - {@link ASSET_TEXT}
+     * - {@link ASSET_TEXTURE}
+     * - {@link ASSET_CUBEMAP}
+     * - {@link ASSET_SHADER}
+     * - {@link ASSET_CSS}
+     * - {@link ASSET_HTML}
+     * - {@link ASSET_SCRIPT}
+     * - {@link ASSET_CONTAINER}
      *
      * @param {ResourceHandler} handler - An instance of a resource handler supporting atleast load() and open().
      * @example
@@ -74,9 +74,9 @@ class ResourceLoader {
      * the resource.
      * @param {string} url - The URL of the resource to load.
      * @param {string} type - The type of resource expected.
-     * @param {callbacks.ResourceLoader} callback - The callback used when the resource is loaded or an error occurs.
+     * @param {callbacks.ResourceLoader} callback - The callback used when the resource is loaded or an
+     * error occurs. Passed (err, resource) where err is null if there are no errors.
      * @param {Asset} [asset] - Optional asset that is passed into handler
-     * Passed (err, resource) where err is null if there are no errors.
      * @example
      * app.loader.load("../path/to/texture.png", "texture", function (err, texture) {
      *     // use texture here
@@ -139,7 +139,7 @@ class ResourceLoader {
             const normalizedUrl = url.split('?')[0];
             if (this._app.enableBundles && this._app.bundles.hasUrl(normalizedUrl)) {
                 if (!this._app.bundles.canLoadUrl(normalizedUrl)) {
-                    handleLoad('Bundle for ' + url + ' not loaded yet');
+                    handleLoad(`Bundle for ${url} not loaded yet`);
                     return;
                 }
 
@@ -152,7 +152,7 @@ class ResourceLoader {
             } else {
                 handleLoad(null, {
                     load: url,
-                    original: asset && asset.getPreferredFile().filename || url
+                    original: asset && asset.file.filename || url
                 });
             }
         }

@@ -25,16 +25,33 @@ class ImgParser {
     }
 
     load(url, callback, asset) {
+        const hasContents = !!asset?.file?.contents;
+
+        if (hasContents) {
+            url = {
+                load: URL.createObjectURL(new Blob([asset.file.contents])),
+                original: url.original
+            };
+        }
+
+        const handler = (err, result) => {
+            if (hasContents) {
+                URL.revokeObjectURL(url.load);
+            }
+            callback(err, result);
+        };
+
         let crossOrigin;
         if (asset && asset.options && asset.options.hasOwnProperty('crossOrigin')) {
             crossOrigin = asset.options.crossOrigin;
         } else if (ABSOLUTE_URL.test(url.load)) {
             crossOrigin = this.crossOrigin;
         }
+
         if (this.useImageBitmap) {
-            this._loadImageBitmap(url.load, url.original, crossOrigin, callback);
+            this._loadImageBitmap(url.load, url.original, crossOrigin, handler);
         } else {
-            this._loadImage(url.load, url.original, crossOrigin, callback);
+            this._loadImage(url.load, url.original, crossOrigin, handler);
         }
     }
 
@@ -75,7 +92,7 @@ class ImgParser {
 
             if (maxRetries > 0 && ++retries <= maxRetries) {
                 const retryDelay = Math.pow(2, retries) * 100;
-                console.log("Error loading Texture from: '" + originalUrl + "' - Retrying in " + retryDelay + "ms...");
+                console.log(`Error loading Texture from: '${originalUrl}' - Retrying in ${retryDelay}ms...`);
 
                 const idx = url.indexOf('?');
                 const separator = idx >= 0 ? '&' : '?';
@@ -88,7 +105,7 @@ class ImgParser {
                 }, retryDelay);
             } else {
                 // Call error callback with details.
-                callback("Error loading Texture from: '" + originalUrl + "'");
+                callback(`Error loading Texture from: '${originalUrl}'`);
             }
         };
 

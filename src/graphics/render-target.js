@@ -1,3 +1,4 @@
+import { DeprecatedLog } from '../deprecated/deprecated-log.js';
 import { PIXELFORMAT_DEPTH, PIXELFORMAT_DEPTHSTENCIL } from './constants.js';
 
 import { GraphicsDevice } from './graphics-device.js';
@@ -25,12 +26,14 @@ const defaultOptions = {
  * face of the cubemap to render to. Can be:
  * @param {string} [options.name] - The name of the render target.
  *
- * * {@link CUBEFACE_POSX}
- * * {@link CUBEFACE_NEGX}
- * * {@link CUBEFACE_POSY}
- * * {@link CUBEFACE_NEGY}
- * * {@link CUBEFACE_POSZ}
- * * {@link CUBEFACE_NEGZ}
+ * - {@link CUBEFACE_POSX}
+ * - {@link CUBEFACE_NEGX}
+ * - {@link CUBEFACE_POSY}
+ * - {@link CUBEFACE_NEGY}
+ * - {@link CUBEFACE_POSZ}
+ * - {@link CUBEFACE_NEGZ}
+ *
+ * @param {boolean} [options.flipY] - When set to true the image will be flipped in Y. Default is false.
  *
  * Defaults to {@link CUBEFACE_POSX}.
  * @example
@@ -64,9 +67,7 @@ class RenderTarget {
             this._colorBuffer = _arg2;
             options = _arg3;
 
-            // #if _DEBUG
-            console.warn('DEPRECATED: pc.RenderTarget constructor no longer accepts GraphicsDevice parameter.');
-            // #endif
+            DeprecatedLog.log('DEPRECATED: pc.RenderTarget constructor no longer accepts GraphicsDevice parameter.');
 
         } else {
             // new constructor
@@ -126,6 +127,9 @@ class RenderTarget {
         if (!this.name) {
             this.name = "Untitled";
         }
+
+        // render image flipped in Y
+        this.flipY = !!options.flipY;
     }
 
     /**
@@ -279,12 +283,12 @@ class RenderTarget {
      * @description If the render target is bound to a cubemap, this property
      * specifies which face of the cubemap is rendered to. Can be:
      *
-     * * {@link CUBEFACE_POSX}
-     * * {@link CUBEFACE_NEGX}
-     * * {@link CUBEFACE_POSY}
-     * * {@link CUBEFACE_NEGY}
-     * * {@link CUBEFACE_POSZ}
-     * * {@link CUBEFACE_NEGZ}
+     * - {@link CUBEFACE_POSX}
+     * - {@link CUBEFACE_NEGX}
+     * - {@link CUBEFACE_POSY}
+     * - {@link CUBEFACE_NEGY}
+     * - {@link CUBEFACE_POSZ}
+     * - {@link CUBEFACE_NEGZ}
      */
     get face() {
         return this._face;

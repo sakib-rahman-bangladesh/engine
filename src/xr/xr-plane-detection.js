@@ -1,3 +1,4 @@
+import { platform } from '../core/platform.js';
 import { EventHandler } from '../core/event-handler.js';
 import { XrPlane } from './xr-plane.js';
 
@@ -6,6 +7,7 @@ import { XrPlane } from './xr-plane.js';
  * @name XrPlaneDetection
  * @classdesc Plane Detection provides the ability to detect real world surfaces based on estimations of the underlying AR system.
  * @description Plane Detection provides the ability to detect real world surfaces based on estimations of the underlying AR system.
+ * @hideconstructor
  * @param {XrManager} manager - WebXR Manager.
  * @property {boolean} supported True if Plane Detection is supported.
  * @property {boolean} available True if Plane Detection is available. This property can be set to true only during a running session.
@@ -25,7 +27,7 @@ class XrPlaneDetection extends EventHandler {
         super();
 
         this._manager = manager;
-        this._supported = !! window.XRPlane;
+        this._supported = platform.browser && !!window.XRPlane;
         this._available = false;
 
         // key - XRPlane (native plane does not have ID's)
@@ -92,7 +94,7 @@ class XrPlaneDetection extends EventHandler {
     update(frame) {
         let detectedPlanes;
 
-        if (! this._available) {
+        if (!this._available) {
             try {
                 detectedPlanes = frame.detectedPlanes;
                 this._planes = [];
@@ -122,7 +124,7 @@ class XrPlaneDetection extends EventHandler {
         for (const xrPlane of detectedPlanes) {
             let plane = this._planesIndex.get(xrPlane);
 
-            if (! plane) {
+            if (!plane) {
                 // detected plane is not indexed
                 // then create new XrPlane
                 plane = new XrPlane(this, xrPlane);

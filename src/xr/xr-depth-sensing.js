@@ -1,3 +1,4 @@
+import { platform } from '../core/platform.js';
 import { EventHandler } from '../core/event-handler.js';
 import { Mat4 } from '../math/mat4.js';
 import { Texture } from '../graphics/texture.js';
@@ -11,6 +12,7 @@ import { XRDEPTHSENSINGUSAGE_CPU, XRDEPTHSENSINGUSAGE_GPU } from './constants.js
  * @augments EventHandler
  * @classdesc Depth Sensing provides depth information which is reconstructed using the underlying AR system. It provides the ability to query depth values (CPU path) or access a depth texture (GPU path). Depth information can be used (not limited to) for reconstructing real world geometry, virtual object placement, occlusion of virtual objects by real world geometry and more.
  * @description Depth Sensing provides depth information which is reconstructed using the underlying AR system. It provides the ability to query depth values (CPU path) or access a depth texture (GPU path). Depth information can be used (not limited to) for reconstructing real world geometry, virtual object placement, occlusion of virtual objects by real world geometry and more.
+ * @hideconstructor
  * @param {XrManager} manager - WebXR Manager.
  * @property {boolean} supported True if Depth Sensing is supported.
  * @property {number} width Width of depth texture or 0 if not available.
@@ -189,7 +191,7 @@ class XrDepthSensing extends EventHandler {
     }
 
     update(frame, view) {
-        if (! this._usage)
+        if (!this._usage)
             return;
 
         let depthInfoCpu = null;
@@ -200,7 +202,7 @@ class XrDepthSensing extends EventHandler {
             depthInfoGpu = frame.getDepthInformation(view);
         }
 
-        if ((this._depthInfoCpu && ! depthInfoCpu) || (! this._depthInfoCpu && depthInfoCpu) || (this.depthInfoGpu && ! depthInfoGpu) || (! this._depthInfoGpu && depthInfoGpu)) {
+        if ((this._depthInfoCpu && !depthInfoCpu) || (!this._depthInfoCpu && depthInfoCpu) || (this.depthInfoGpu && !depthInfoGpu) || (!this._depthInfoGpu && depthInfoGpu)) {
             this._matrixDirty = true;
         }
         this._depthInfoCpu = depthInfoCpu;
@@ -220,10 +222,10 @@ class XrDepthSensing extends EventHandler {
             }
         }
 
-        if ((this._depthInfoCpu || this._depthInfoGpu) && ! this._available) {
+        if ((this._depthInfoCpu || this._depthInfoGpu) && !this._available) {
             this._available = true;
             this.fire('available');
-        } else if (! this._depthInfoCpu && ! this._depthInfoGpu && this._available) {
+        } else if (!this._depthInfoCpu && !this._depthInfoGpu && this._available) {
             this._available = false;
             this.fire('unavailable');
         }
@@ -246,14 +248,14 @@ class XrDepthSensing extends EventHandler {
         // TODO
         // GPU usage
 
-        if (! this._depthInfoCpu)
+        if (!this._depthInfoCpu)
             return null;
 
         return this._depthInfoCpu.getDepthInMeters(u, v);
     }
 
     get supported() {
-        return !! window.XRDepthInformation;
+        return platform.browser && !!window.XRDepthInformation;
     }
 
     /**

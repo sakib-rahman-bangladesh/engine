@@ -11,8 +11,12 @@ function UntarScope(isWorker) {
     let asciiDecoder;
 
     if (typeof TextDecoder !== 'undefined') {
-        utfDecoder = new TextDecoder('utf-8');
-        asciiDecoder = new TextDecoder('windows-1252');
+        try {
+            utfDecoder = new TextDecoder('utf-8');
+            asciiDecoder = new TextDecoder('windows-1252');
+        } catch (e) {
+            console.warn('TextDecoder not supported - pc.Untar module will not work');
+        }
     } else {
         console.warn('TextDecoder not supported - pc.Untar module will not work');
     }
@@ -92,7 +96,7 @@ function UntarScope(isWorker) {
         this._bytesRead = 0;
     }
 
-    if (! isWorker) {
+    if (!isWorker) {
         Untar = UntarInternal;
     }
 
@@ -162,7 +166,7 @@ function UntarScope(isWorker) {
             this._bytesRead += (512 - remainder);
         }
 
-        if (! normalFile) {
+        if (!normalFile) {
             return null;
         }
 
@@ -202,7 +206,7 @@ function UntarScope(isWorker) {
      * @returns {object[]} An array of files in this format {name, start, size, url}.
      */
     UntarInternal.prototype.untar = function (filenamePrefix) {
-        if (! utfDecoder) {
+        if (!utfDecoder) {
             console.error('Cannot untar because TextDecoder interface is not available for this platform.');
             return [];
         }
@@ -210,7 +214,7 @@ function UntarScope(isWorker) {
         const files = [];
         while (this._hasNext()) {
             const file = this._readNextFile();
-            if (! file) continue;
+            if (!file) continue;
             if (filenamePrefix && file.name) {
                 file.name = filenamePrefix + file.name;
             }
@@ -282,7 +286,7 @@ class UntarWorker {
 
     _onMessage(e) {
         const id = e.data.id;
-        if (! this._pendingRequests[id]) return;
+        if (!this._pendingRequests[id]) return;
 
         const callback = this._pendingRequests[id];
 
@@ -338,11 +342,7 @@ class UntarWorker {
      * @returns {boolean} Returns true of false.
      */
     hasPendingRequests() {
-        for (const key in this._pendingRequests) {
-            return true;
-        }
-
-        return false;
+        return Object.keys(this._pendingRequests).length > 0;
     }
 
     /**
